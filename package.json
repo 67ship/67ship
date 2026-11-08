@@ -1,0 +1,12 @@
+{
+  "name": "67ship",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@easypost/api": "latest",
+    "dotenv": "latest",
+    "express": "latest"
+  }
+}
