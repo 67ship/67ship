@@ -45,20 +45,20 @@ app.get('/', (req, res) => {
 <div class="container">
   <div class="header"><div><img src="/images/logo.jpg" alt="67ship.com" style="height:154px; max-width:100%; object-fit:contain; display:block;"></div><div class="slogan"><h2>Resize. <span>Watch It Drop.</span> Live.</h2><p>The only site where changing your box changes your price instantly</p><div class="badge">LIVE AUTO-RATES • RIGHT HERE • NO SCROLL • 67SHIP.COM ON EVERY LABEL</div></div></div>
   
-  <div class="top-address">
+    <div class="top-address">
     <div class="card"><h3>📤 Ship From - Full Address</h3>
-      <div class="row"><div class="field"><label>Full Name</label><input id="from_name" value="Wesley Claggett"></div><div class="field"><label>Company</label><input id="from_company" value="KOED"></div></div>
-      <div class="field"><label>Street</label><input id="from_street" value="123 Main St"></div>
-      <div class="row"><div class="field"><label>City</label><input id="from_city" value="Los Angeles"></div><div class="field"><label>State</label><input id="from_state" value="CA"></div></div>
-      <div class="row"><div class="field"><label>ZIP</label><input id="from_zip" value="90012"></div><div class="field"><label>Country</label><select id="from_country"><option value="US" selected>US</option></select></div></div>
-      <div class="field"><label>Phone</label><input id="from_phone" value="3235550100"></div>
+      <div class="row"><div class="field"><label>Full Name</label><input id="from_name" value="" placeholder="Full Name"></div><div class="field"><label>Company</label><input id="from_company" value="" placeholder="Company (optional)"></div></div>
+      <div class="field"><label>Street</label><input id="from_street" value="" placeholder="Street"></div>
+      <div class="row"><div class="field"><label>City</label><input id="from_city" value="" placeholder="City"></div><div class="field"><label>State</label><input id="from_state" value="" placeholder="State"></div></div>
+      <div class="row"><div class="field"><label>ZIP</label><input id="from_zip" value="" placeholder="ZIP"></div><div class="field"><label>Country</label><select id="from_country"><option value="US" selected>US</option></select></div></div>
+      <div class="field"><label>Phone</label><input id="from_phone" value="" placeholder="Phone"></div>
     </div>
     <div class="card"><h3>📥 Ship To - Full Address</h3>
-      <div class="row"><div class="field"><label>Full Name</label><input id="to_name" value="John Customer"></div><div class="field"><label>Company</label><input id="to_company" value=""></div></div>
-      <div class="field"><label>Street</label><input id="to_street" value="456 Market St"></div>
-      <div class="row"><div class="field"><label>City</label><input id="to_city" value="New York"></div><div class="field"><label>State</label><input id="to_state" value="NY"></div></div>
-      <div class="row"><div class="field"><label>ZIP</label><input id="to_zip" value="10001"></div><div class="field"><label>Country</label><select id="to_country"><option value="US" selected>US</option></select></div></div>
-      <div class="field"><label>Phone</label><input id="to_phone" value="2125550100"></div>
+      <div class="row"><div class="field"><label>Full Name</label><input id="to_name" value="" placeholder="Full Name"></div><div class="field"><label>Company</label><input id="to_company" value=""></div></div>
+      <div class="field"><label>Street</label><input id="to_street" value="" placeholder="Street"></div>
+      <div class="row"><div class="field"><label>City</label><input id="to_city" value="" placeholder="City"></div><div class="field"><label>State</label><input id="to_state" value="" placeholder="State"></div></div>
+      <div class="row"><div class="field"><label>ZIP</label><input id="to_zip" value="" placeholder="ZIP"></div><div class="field"><label>Country</label><select id="to_country"><option value="US" selected>US</option></select></div></div>
+      <div class="field"><label>Phone</label><input id="to_phone" value="" placeholder="Phone"></div>
     </div>
   </div>
 
