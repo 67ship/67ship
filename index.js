@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // Serve images/ folder so <img src="/images/logo.jpg"> works
 app.use('/images', express.static('images'));
-3app.use(express.static('public'));
+app.use(express.static('public'));
 const client = new EasyPostClient(process.env.EASYPOST_API_KEY);
 
 app.get('/', (req, res) => {
