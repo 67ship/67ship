@@ -43,7 +43,7 @@ app.get('/', (req, res) => {
   @media(max-width:1000px){.top-address{grid-template-columns:1fr} .main-row{grid-template-columns:1fr} .header{flex-direction:column;gap:10px;text-align:center} .slogan{text-align:center}}
 </style></head><body>
 <div class="container">
-  <div class="header"><div><img src="/images/logo.jpg" alt="67ship.com" style="height:154px; max-width:100%; object-fit:contain; display:block;"></div><div class="slogan"><h2>Resize. <span>Watch It Drop.</span> Live.</h2><p>The only site where changing your box changes your price instantly</p><div class="badge">LIVE PRICE UPDATES • RIGHT HERE • NO RELOAD NEEDED</div></div></div>
+  <div class="header"><div><img src="/images/logo.jpg" alt="67ship.com" style="height:154px; max-width:100%; object-fit:contain; display:block;"></div><div class="slogan"><h2>Resize. <span>Watch It Drop.</span> Live.</h2><p>The only site where changing your box changes your price instantly</p><div class="badge">LIVE PRICE UPDATES • NO RELOAD NEEDED</div></div></div>
   
     <div class="top-address">
     <div class="card"><h3>📤 Ship From - Full Address</h3>
