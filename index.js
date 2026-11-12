@@ -73,11 +73,17 @@ app.get('/', (req, res) => {
           <div class="dim-box wt"><label>oz</label><input id="pkg_oz" value="8" type="number" min="0" step="1" onfocus="this.select()" onclick="this.select()"></div>
           <div style="margin-left:8px;font-size:13px;font-weight:800;color:#0066ff">→ PRICE DROPS LIVE →</div>
         </div>
+        <div id="cheapestBox" onclick="document.getElementById('ratesPanel').scrollIntoView({behavior:'smooth'})" style="margin-top:14px;background:#ecfdf5;border:2px solid #10b981;border-radius:10px;padding:12px 14px;cursor:pointer;text-align:center">
+          <div style="font-size:11px;font-weight:800;color:#065f46;letter-spacing:0.5px">CHEAPEST FOR THIS SIZE</div>
+          <div id="cheapestPrice" style="font-size:28px;font-weight:900;color:#059669;line-height:1.1">—</div>
+          <div id="cheapestCarrier" style="font-size:13px;font-weight:700;color:#111">Enter box size</div>
+          <div style="font-size:12px;font-weight:800;color:#0066ff;margin-top:4px">See all rates ↓</div>
+      </div>
         <div class="tip">💡 This is the game changer: Type 10 → 9 in L and watch CHEAPEST price on the right drop instantly. No scroll needed. Price is RIGHT HERE at dimension window. 67ship.com on every label footer.</div>
       </div>
       <div id="labelResult"></div>
     </div>
-    <div class="rates-panel"><div class="rates-header"><h3>💰 Live Prices — Right Here</h3><div class="live"><div class="dot"></div><span id="ratesCount">Live</span></div></div>
+    <div class="rates-panel" id="ratesPanel"><div class="rates-header"><h3>💰 Live Prices — Right Here</h3><div class="live"><div class="dot"></div><span id="ratesCount">Live</span></div></div>
       <div style="display:flex;gap:8px;padding:10px 14px;background:#f9fafb;border-bottom:1px solid #e5e7eb;align-items:center">
         <label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:800;cursor:pointer"><input type="checkbox" id="filter_usps" checked style="width:14px"> USPS</label>
         <label style="display:flex;align-items:center;gap:4px;font-size:12px;font-weight:800;cursor:pointer"><input type="checkbox" id="filter_ups" checked style="width:14px"> UPS</label>
