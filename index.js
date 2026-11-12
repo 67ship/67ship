@@ -66,11 +66,11 @@ app.get('/', (req, res) => {
     <div>
       <div class="card highlight"><h3>📦 Package Dimensions — Takes Full Row — Prices Start RIGHT HERE →</h3>
         <div class="dim-row">
-          <div class="dim-box"><label>L (in)</label><input id="pkg_length" value="10" type="number" step="1" min="1"></div>
-          <div class="dim-box"><label>W (in)</label><input id="pkg_width" value="8" type="number" step="1" min="1"></div>
-          <div class="dim-box"><label>H (in)</label><input id="pkg_height" value="6" type="number" step="1" min="1"></div>
-          <div class="dim-box wt"><label>lbs</label><input id="pkg_lbs" value="1" type="number" min="0" step="1"></div>
-          <div class="dim-box wt"><label>oz</label><input id="pkg_oz" value="8" type="number" min="0" step="1"></div>
+          <div class="dim-box"><label>L (in)</label><input id="pkg_length" value="10" type="number" step="1" min="1" onfocus="this.select()" onclick="this.select()"></div>
+          <div class="dim-box"><label>W (in)</label><input id="pkg_width" value="8" type="number" step="1" min="1" onfocus="this.select()" onclick="this.select()"></div>
+          <div class="dim-box"><label>H (in)</label><input id="pkg_height" value="6" type="number" step="1" min="1" onfocus="this.select()" onclick="this.select()"></div>
+          <div class="dim-box wt"><label>lbs</label><input id="pkg_lbs" value="1" type="number" min="0" step="1" onfocus="this.select()" onclick="this.select()"></div>
+          <div class="dim-box wt"><label>oz</label><input id="pkg_oz" value="8" type="number" min="0" step="1" onfocus="this.select()" onclick="this.select()"></div>
           <div style="margin-left:8px;font-size:13px;font-weight:800;color:#0066ff">→ PRICE DROPS LIVE →</div>
         </div>
         <div class="tip">💡 This is the game changer: Type 10 → 9 in L and watch CHEAPEST price on the right drop instantly. No scroll needed. Price is RIGHT HERE at dimension window. 67ship.com on every label footer.</div>
