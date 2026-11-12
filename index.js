@@ -140,126 +140,23 @@ function filterAndRenderRates(){
     if(c.includes('fedex') && !f.fedex) return false;
     if(c.includes('federal') && !f.fedex) return false;
     return true;
-    }).sort((a,b)=>parseFloat(a.rate)-parseFloat(b.rate));
-
-  if(filtered.length===0){
-    resultsDiv.innerHTML='<div class=loading>No carriers selected<br>Check 【entity-USPS¦canonical_name=USPS】/【entity-UPS¦canonical_name=UPS】/【entity-FedEx¦canonical_name=FedEx】 above</div>';
-    countEl.textContent='0 rates';
-    infoEl.textContent='None';
-    return;
-  }
-
+  }).sort((a,b)=>parseFloat(a.rate)-parseFloat(b.rate));
+  if(filtered.length===0){resultsDiv.innerHTML='<div class=loading>No carriers selected<br>Check USPS/UPS/FedEx above</div>'; countEl.textContent='0 rates'; infoEl.textContent='None'; return;}
   countEl.textContent=filtered.length+' rates • $'+parseFloat(filtered[0].rate).toFixed(2)+' cheapest';
-
   document.getElementById('cheapestPrice').textContent='$'+parseFloat(filtered[0].rate).toFixed(2);
   document.getElementById('cheapestCarrier').textContent=cleanCarrier(filtered[0].carrier)+' - '+cleanService(filtered[0].service);
-
-  const active=[f.【entity-usps¦canonical_name=USPS】?'【entity-USPS¦canonical_name=USPS】':null,f.【entity-ups¦canonical_name=UPS】?'【entity-UPS¦canonical_name=UPS】':null,f.【entity-fedex¦canonical_name=FedEx】?'【entity-FedEx¦canonical_name=FedEx】':null].filter(Boolean).join(' + ');
+  const active = [f.usps?'USPS':null,f.ups?'UPS':null,f.fedex?'FedEx':null].filter(Boolean).join(' + ');
   infoEl.textContent=active||'None';
-
-  let html='';
-  filtered.forEach((r,idx)=>{
-    const retail=parseFloat(r.retail_rate||r.retailRate||(parseFloat(r.rate)*1.45).toFixed(2));
-    const our=parseFloat(r.rate);
-    const savings=Math.round(((retail-our)/retail)*100);
-    const isCheapest=idx===0;
-    const cleanC=cleanCarrier(r.carrier);
-    const cleanS=cleanService(r.service);
-    const badge=isCheapest?'<span class=cheapest>CHEAPEST →</span>':'';
-    const leftStyle=isCheapest?'style=border-left:4px solid #10b981;background:#ecfdf5':'';
-    html+='<div class=rate-item '+leftStyle+' data-rateid='+r.id+' data-rate='+r.rate+' data-carrier='+cleanC+'>';
-    html+='<div style=flex:1>';
-    html+='<div style=font-weight:800;font-size:14px>'+cleanC+' - '+cleanS+' '+badge+'</div>';
-    html+='</div>';
-    html+='<div style=text-align:right>';
-    html+='<div><span class=retail>$'+retail.toFixed(2)+'</span><span class=our-rate>$'+our.toFixed(2)+'</span></div>';
-    html+='<div class=savings>Save '+savings+'%</div>';
-    html+='</div></div>';
-  });
-  resultsDiv.innerHTML=html;
-
-  document.querySelectorAll('.rate-item').forEach(el=>{
-    el.addEventListener('click',()=>{
-      document.querySelectorAll('.rate-item').forEach(x=>{x.classList.remove('selected');});
-      el.classList.add('selected');
-      selectedRateId=el.getAttribute('data-rateid');
-      const rate=el.getAttribute('data-rate');
-      const carrier=el.getAttribute('data-carrier');
-      const buyBtn=document.getElementById('buyBtn');
-      buyBtn.disabled=false;
-      buyBtn.textContent='Buy Label - $'+rate+' ('+carrier+')';
-    });
-  });
-
-  const first=document.querySelector('.rate-item');
-  if(first)first.click();
+  let html='';filtered.forEach((r,idx)=>{const retail=parseFloat(r.retail_rate||r.retailRate||(parseFloat(r.rate)*1.45).toFixed(2));const our=parseFloat(r.rate);const savings=Math.round(((retail-our)/retail)*100);const isCheapest=idx===0;html+='<div class=rate-item '+(isCheapest?'style=border-left:4px solid #10b981;background:#ecfdf5':'')+' data-rateid='+r.id+' data-rate='+r.rate+' data-carrier='+cleanCarrier(r.carrier)+'><div style=flex:1><div style=font-weight:800;font-size:14px>'+cleanService(r.service)+' '+(isCheapest?'<span class=cheapest>CHEAPEST →</span>':'')+'</div><div style=font-size:13px;color:#6b7280>'+r.service+'</div></div><div style=text-align:right><div><span class=retail>$'+retail.toFixed(2)+'</span><span class=our-rate>$'+our.toFixed(2)+'</span></div><div class=savings>Save '+savings+'%</div></div></div>';});resultsDiv.innerHTML=html;
+  document.querySelectorAll('.rate-item').forEach(el=>{el.addEventListener('click',()=>{document.querySelectorAll('.rate-item').forEach(x=>{x.classList.remove('selected');});el.classList.add('selected');selectedRateId=el.getAttribute('data-rateid');const rate=el.getAttribute('data-rate');const carrier=el.getAttribute('data-carrier');const buyBtn=document.getElementById('buyBtn');buyBtn.disabled=false;buyBtn.textContent='Buy Label - $'+rate+' ('+carrier+')';});});
+  const first=document.querySelector('.rate-item');if(first)first.click();
 }
-
-async function fetchRates(){
-  if(!canFetch())return;
-  const payload=getPayload();
-  const str=JSON.stringify(payload);
-  if(str===lastPayloadStr)return;
-  lastPayloadStr=str;
-  const resultsDiv=document.getElementById('results');
-  const countEl=document.getElementById('ratesCount');
-  countEl.textContent='Updating '+payload.parcel.length+'x'+payload.parcel.width+'x'+payload.parcel.height+'...';
-  resultsDiv.innerHTML='<div class=loading>↻ '+payload.parcel.length+' x '+payload.parcel.width+' x '+payload.parcel.height+'<br>Finding cheapest...</div>';
-  try{
-    const res=await fetch('/api/get-rates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const data=await res.json();
-    if(!res.ok){resultsDiv.innerHTML='<div class=loading style=color:red>'+data.error+'</div>';return;}
-    currentShipmentId=data.shipmentId;
-    allRatesCache=data.rates;
-    filterAndRenderRates();
-  }catch(e){resultsDiv.innerHTML='<div class=loading style=color:red>Failed: '+e.message+'</div>';}
-}
-
-function scheduleFetch(){
-  clearTimeout(debounceTimer);
-  debounceTimer=setTimeout(fetchRates,550);
-}
-
-['from_name','from_company','from_street','from_city','from_state','from_zip','from_country','from_phone','to_name','to_company','to_street','to_city','to_state','to_zip','to_country','to_phone','pkg_length','pkg_width','pkg_height','pkg_lbs','pkg_oz'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el){
-    el.addEventListener('input',scheduleFetch);
-    el.addEventListener('change',scheduleFetch);
-  }
-});
-
-['filter_usps','filter_ups','filter_fedex'].forEach(id=>{
-  const el=document.getElementById(id);
-  if(el){
-    el.addEventListener('change',()=>{
-      lastPayloadStr='';
-      filterAndRenderRates();
-      if(allRatesCache.length===0) scheduleFetch();
-    });
-  }
-});
-
+async function fetchRates(){if(!canFetch())return;const payload=getPayload();const str=JSON.stringify(payload);if(str===lastPayloadStr)return;lastPayloadStr=str;const resultsDiv=document.getElementById('results');const countEl=document.getElementById('ratesCount');countEl.textContent='Updating '+payload.parcel.length+'x'+payload.parcel.width+'x'+payload.parcel.height+'...';resultsDiv.innerHTML='<div class=loading>↻ '+payload.parcel.length+' x '+payload.parcel.width+' x '+payload.parcel.height+'<br>Finding cheapest...</div>';try{const res=await fetch('/api/get-rates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await res.json();if(!res.ok){resultsDiv.innerHTML='<div class=loading style=color:red>'+data.error+'</div>';return;}currentShipmentId=data.shipmentId;allRatesCache=data.rates;filterAndRenderRates();}catch(e){resultsDiv.innerHTML='<div class=loading style=color:red>Failed: '+e.message+'</div>';}}
+function scheduleFetch(){clearTimeout(debounceTimer);debounceTimer=setTimeout(fetchRates,550);}
+['from_name','from_company','from_street','from_city','from_state','from_zip','from_country','from_phone','to_name','to_company','to_street','to_city','to_state','to_zip','to_country','to_phone','pkg_length','pkg_width','pkg_height','pkg_lbs','pkg_oz'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('input',scheduleFetch);el.addEventListener('change',scheduleFetch);}});
+['filter_usps','filter_ups','filter_fedex'].forEach(id=>{const el=document.getElementById(id);if(el){el.addEventListener('change',()=>{lastPayloadStr='';filterAndRenderRates();if(allRatesCache.length===0) scheduleFetch();});}});
 setTimeout(fetchRates,800);
-
-document.getElementById('buyBtn').addEventListener('click',async()=>{
-  if(!selectedRateId||!currentShipmentId)return;
-  const buyBtn=document.getElementById('buyBtn');
-  const orig=buyBtn.textContent;
-  buyBtn.textContent='Buying...';
-  buyBtn.disabled=true;
-  const labelDiv=document.getElementById('labelResult');
-  labelDiv.innerHTML='<div class=card style=text-align:center>Buying...</div>';
-  labelDiv.scrollIntoView({behavior:'smooth'});
-  try{
-    const res=await fetch('/api/buy-label',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shipmentId:currentShipmentId,rateId:selectedRateId})});
-    const data=await res.json();
-    if(!res.ok){alert('Buy Error: '+data.error);buyBtn.textContent=orig;buyBtn.disabled=false;return;}
-    labelDiv.innerHTML='<div class=label-box id=labelBox><h2 style=margin:0 0 8px 0>✅ LABEL CREATED</h2><p>Tracking: '+data.tracking_code+'</p><p><strong>'+data.carrier+' - '+data.service+'</strong></p><p style=font-size:13px;color:#6b7280>Retail <s>$'+data.retailRate+'</s> You paid $'+data.rate+' Saved '+data.savings+'% • 67ship.com footer on every label</p><a href='+data.labelUrl+' target=_blank style=display:inline-block;margin-top:12px;padding:14px 28px;background:#111;color:#fff;border-radius:10px;text-decoration:none;font-weight:800>OPEN & PRINT LABEL</a></div>';
-    document.getElementById('labelBox').scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>window.open(data.labelUrl,'_blank'),500);
-  }catch(e){alert('Failed: '+e.message);}
-  finally{buyBtn.textContent=orig;buyBtn.disabled=false;}
-});
+document.getElementById('buyBtn').addEventListener('click',async()=>{if(!selectedRateId||!currentShipmentId)return;const buyBtn=document.getElementById('buyBtn');const orig=buyBtn.textContent;buyBtn.textContent='Buying...';buyBtn.disabled=true;const labelDiv=document.getElementById('labelResult');labelDiv.innerHTML='<div class=card style=text-align:center>Buying...</div>';labelDiv.scrollIntoView({behavior:'smooth'});try{const res=await fetch('/api/buy-label',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({shipmentId:currentShipmentId,rateId:selectedRateId})});const data=await res.json();if(!res.ok){alert('Buy Error: '+data.error);buyBtn.textContent=orig;buyBtn.disabled=false;return;}labelDiv.innerHTML='<div class=label-box id=labelBox><h2 style=margin:0 0 8px 0>✅ LABEL CREATED</h2><p>Tracking: '+data.tracking_code+'</p><p><strong>'+data.carrier+' - '+data.service+'</strong></p><p style=font-size:13px;color:#6b7280>Retail <s>$'+data.retailRate+'</s> You paid $'+data.rate+' Saved '+data.savings+'% • 67ship.com footer on every label</p><a href='+data.labelUrl+' target=_blank style=display:inline-block;margin-top:12px;padding:14px 28px;background:#111;color:#fff;border-radius:10px;text-decoration:none;font-weight:800>OPEN & PRINT LABEL</a></div>';document.getElementById('labelBox').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>window.open(data.labelUrl,'_blank'),500);}catch(e){alert('Failed: '+e.message);}finally{buyBtn.textContent=orig;buyBtn.disabled=false;}});
 </script></body></html>
   `);
 });
