@@ -141,6 +141,8 @@ function filterAndRenderRates(){
   }).sort((a,b)=>parseFloat(a.rate)-parseFloat(b.rate));
   if(filtered.length===0){resultsDiv.innerHTML='<div class=loading>No carriers selected<br>Check USPS/UPS/FedEx above</div>'; countEl.textContent='0 rates'; infoEl.textContent='None'; return;}
   countEl.textContent=filtered.length+' rates • $'+parseFloat(filtered[0].rate).toFixed(2)+' cheapest';
+  document.getElementById('cheapestPrice').textContent='$'+parseFloat(filtered[0].rate).toFixed(2);
+  document.getElementById('cheapestCarrier').textContent=filtered[0].carrier+' - '+filtered[0].service;
   const active = [f.usps?'USPS':null,f.ups?'UPS':null,f.fedex?'FedEx':null].filter(Boolean).join(' + ');
   infoEl.textContent=active||'None';
   let html='';filtered.forEach((r,idx)=>{const retail=parseFloat(r.retail_rate||r.retailRate||(parseFloat(r.rate)*1.45).toFixed(2));const our=parseFloat(r.rate);const savings=Math.round(((retail-our)/retail)*100);const isCheapest=idx===0;html+='<div class=rate-item '+(isCheapest?'style=border-left:4px solid #10b981;background:#ecfdf5':'')+' data-rateid='+r.id+' data-rate='+r.rate+' data-carrier='+r.carrier+'><div style=flex:1><div style=font-weight:800;font-size:14px>'+r.carrier+' '+(isCheapest?'<span class=cheapest>CHEAPEST →</span>':'')+'</div><div style=font-size:13px;color:#6b7280>'+r.service+'</div></div><div style=text-align:right><div><span class=retail>$'+retail.toFixed(2)+'</span><span class=our-rate>$'+our.toFixed(2)+'</span></div><div class=savings>Save '+savings+'%</div></div></div>';});resultsDiv.innerHTML=html;
