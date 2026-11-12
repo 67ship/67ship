@@ -126,6 +126,8 @@ function getPayload(){
 function canFetch(){const p=getPayload();return p.from.zip.length>=5 && p.to.zip.length>=5 && parseFloat(p.parcel.length)>0 && parseFloat(p.parcel.width)>0 && parseFloat(p.parcel.height)>0;}
 let allRatesCache=[];
 function getCarrierFilters(){return {usps: document.getElementById('filter_usps')?.checked, ups: document.getElementById('filter_ups')?.checked, fedex: document.getElementById('filter_fedex')?.checked};}
+function cleanCarrier(c){ c=(c||''); if(c.toLowerCase().includes('ups')) return 'UPS'; if(c.toLowerCase().includes('fedex')) return 'FedEx'; if(c.toLowerCase().includes('usps')) return 'USPS'; return c; }
+function cleanService(s){ s=(s||'').replace(/GreaterThan1lb/gi,'').replace(/_/g,' ').replace(/([a-z])([A-Z])/g,'$1 $2').replace(/Groundsaver/gi,'Ground Saver').replace(/Ground Advantage/gi,'Ground Advantage').trim(); return s; }
 function filterAndRenderRates(){
   const resultsDiv=document.getElementById('results');
   const countEl=document.getElementById('ratesCount');
@@ -142,10 +144,10 @@ function filterAndRenderRates(){
   if(filtered.length===0){resultsDiv.innerHTML='<div class=loading>No carriers selected<br>Check USPS/UPS/FedEx above</div>'; countEl.textContent='0 rates'; infoEl.textContent='None'; return;}
   countEl.textContent=filtered.length+' rates • $'+parseFloat(filtered[0].rate).toFixed(2)+' cheapest';
   document.getElementById('cheapestPrice').textContent='$'+parseFloat(filtered[0].rate).toFixed(2);
-  document.getElementById('cheapestCarrier').textContent=filtered[0].carrier+' - '+filtered[0].service;
+  document.getElementById('cheapestCarrier').textContent=cleanCarrier(filtered[0].carrier)+' - '+cleanService(filtered[0].service);
   const active = [f.usps?'USPS':null,f.ups?'UPS':null,f.fedex?'FedEx':null].filter(Boolean).join(' + ');
   infoEl.textContent=active||'None';
-  let html='';filtered.forEach((r,idx)=>{const retail=parseFloat(r.retail_rate||r.retailRate||(parseFloat(r.rate)*1.45).toFixed(2));const our=parseFloat(r.rate);const savings=Math.round(((retail-our)/retail)*100);const isCheapest=idx===0;html+='<div class=rate-item '+(isCheapest?'style=border-left:4px solid #10b981;background:#ecfdf5':'')+' data-rateid='+r.id+' data-rate='+r.rate+' data-carrier='+r.carrier+'><div style=flex:1><div style=font-weight:800;font-size:14px>'+r.carrier+' '+(isCheapest?'<span class=cheapest>CHEAPEST →</span>':'')+'</div><div style=font-size:13px;color:#6b7280>'+r.service+'</div></div><div style=text-align:right><div><span class=retail>$'+retail.toFixed(2)+'</span><span class=our-rate>$'+our.toFixed(2)+'</span></div><div class=savings>Save '+savings+'%</div></div></div>';});resultsDiv.innerHTML=html;
+  let html='';filtered.forEach((r,idx)=>{const retail=parseFloat(r.retail_rate||r.retailRate||(parseFloat(r.rate)*1.45).toFixed(2));const our=parseFloat(r.rate);const savings=Math.round(((retail-our)/retail)*100);const isCheapest=idx===0;html+='<div class=rate-item '+(isCheapest?'style=border-left:4px solid #10b981;background:#ecfdf5':'')+' data-rateid='+r.id+' data-rate='+r.rate+' data-carrier='+cleanCarrier(r.carrier)+'><div style=flex:1><div style=font-weight:800;font-size:14px>>'+cleanService(r.service)+' '+(isCheapest?'<span class=cheapest>CHEAPEST →</span>':'')+'</div><div style=font-size:13px;color:#6b7280>'+r.service+'</div></div><div style=text-align:right><div><span class=retail>$'+retail.toFixed(2)+'</span><span class=our-rate>$'+our.toFixed(2)+'</span></div><div class=savings>Save '+savings+'%</div></div></div>';});resultsDiv.innerHTML=html;
   document.querySelectorAll('.rate-item').forEach(el=>{el.addEventListener('click',()=>{document.querySelectorAll('.rate-item').forEach(x=>{x.classList.remove('selected');});el.classList.add('selected');selectedRateId=el.getAttribute('data-rateid');const rate=el.getAttribute('data-rate');const carrier=el.getAttribute('data-carrier');const buyBtn=document.getElementById('buyBtn');buyBtn.disabled=false;buyBtn.textContent='Buy Label - $'+rate+' ('+carrier+')';});});
   const first=document.querySelector('.rate-item');if(first)first.click();
 }
