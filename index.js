@@ -112,7 +112,22 @@ const server = http.createServer(async (req, res) => {
       }
       try {
         // FIXED: WARP wants header named api_key, NOT Authorization Bearer
-        const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'api_key': CARRIER_API_KEY }, body: body });
+        const incoming = JSON.parse(body || '{}');
+const warpBody = JSON.stringify({
+  pickupDate: new Date().toISOString().slice(0,10),
+  pickupInfo: { zipcode: String(incoming.from_zip || '') },
+  deliveryInfo: { zipcode: String(incoming.to_zip || '') },
+  items: [{
+    height: Number(incoming.height || 6),
+    length: Number(incoming.length || 10),
+    width: Number(incoming.width || 8),
+    sizeUnit: 'IN',
+    totalWeight: Number(incoming.weight_lbs || 2),
+    weightUnit: 'lbs',
+    quantity: 1
+  }]
+});
+const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'apikey': CARRIER_API_KEY }, body: warpBody });
         const txt = await r.text();
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(txt);
