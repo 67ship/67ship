@@ -111,7 +111,8 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       try {
-        const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + CARRIER_API_KEY }, body: body });
+        // FIXED: WARP wants header named api_key, NOT Authorization Bearer
+        const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'api_key': CARRIER_API_KEY }, body: body });
         const txt = await r.text();
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(txt);
