@@ -127,7 +127,7 @@ const warpBody = JSON.stringify({
     quantity: 1
   }]
 });
-const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'apikey': CARRIER_API_KEY }, body: warpBody });
+const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'api_key': CARRIER_API_KEY }, body: warpBody });
         const txt = await r.text();
 let parsed = {};
 try { parsed = JSON.parse(txt); } catch(e) {}
