@@ -129,8 +129,21 @@ const warpBody = JSON.stringify({
 });
 const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'apikey': CARRIER_API_KEY }, body: warpBody });
         const txt = await r.text();
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(txt);
+let parsed = {};
+try { parsed = JSON.parse(txt); } catch(e) {}
+let options = parsed.options || parsed.quotes || [];
+let rates = options.map(o => ({
+  carrier: o.carrierName || o.carrierCode || 'Carrier',
+  service: o.serviceLevel || o.shipmentType || 'Standard',
+  price: Number(o.rate || o.price?.amount || 0),
+  eta: o.transitTime ? o.transitTime + ' days' : ''
+}));
+res.writeHead(200, { 'Content-Type': 'application/json' });
+if (rates.length) {
+  res.end(JSON.stringify({ rates: rates, raw: parsed }));
+} else {
+  res.end(JSON.stringify(parsed));
+}
       } catch (e) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ demo: true, error: e.message }));
