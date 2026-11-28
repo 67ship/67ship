@@ -3,7 +3,6 @@ const http = require('http');
 const PORT = process.env.PORT || 3000;
 // Keys come from Render Environment Variables, NOT from this file.
 // In Render: Settings > Environment > Add: CARRIER_API_URL and CARRIER_API_KEY
-// Locally: create a file named .env (never commit it) with those same 2 lines.
 const CARRIER_API_URL = process.env.CARRIER_API_URL || '';
 const CARRIER_API_KEY = process.env.CARRIER_API_KEY || '';
 const html = `<!DOCTYPE html>
@@ -69,7 +68,7 @@ footer{border-top:1px solid #e2e8f0;padding:32px 0;color:#64748b;text-align:cent
 <div id="page-dash" class="hidden"><div style="max-width:800px;margin:40px auto"><h2 style="font-size:32px;margin:0">Hi, <span id="dashName">there</span> 👋</h2><p style="color:#475569">This is your dashboard.</p><div class="grid3"><div class="card"><b>Ship a package</b><p>Start a new label.</p><button class="btn" style="margin-top:12px" onclick="go('ship')">New Shipment →</button></div><div class="card"><b>Your shipments</b><p id="shipCount">0 shipments yet</p><button class="btn2" style="margin-top:12px" onclick="go('shipments')">View All</button></div><div class="card"><b>API Test</b><p id="apiStatus">Checking server API…</p><button class="btn2" style="margin-top:12px" onclick="go('api')">Test API →</button></div></div></div></div>
 <div id="page-ship" class="hidden"><div class="box" style="max-width:720px"><h2 style="margin:0;font-size:32px">Ship a package</h2><p style="color:#475569">Rates come from the live API via the server. <span id="rateSource" class="badge badge-off">Checking…</span></p><div class="row"><div style="flex:1"><label>Ship From ZIP</label><input id="fromZip" value="90210"></div><div style="flex:1"><label>Ship To ZIP</label><input id="toZip" value="10001"></div></div><div class="row"><div style="flex:1"><label>To Name</label><input id="toName" placeholder="Who is it going to?"></div><div style="flex:1"><label>To Address</label><input id="toAddr" placeholder="Street address"></div></div><label>Weight</label><div class="row"><input id="lbs" type="number" value="2" placeholder="lbs"><input id="oz" type="number" value="8" placeholder="oz"></div><label>Box Size (in)</label><div class="row"><input id="len" type="number" value="10"><input id="wid" type="number" value="8"><input id="hei" type="number" value="6"></div><div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;margin-top:20px">Billable: <b id="billable">2.50 lb</b> • Dim: <span id="dim">1.48 lb</span> • Starting at <b id="starting" style="font-size:22px">$5.65</b></div><div id="rateList"></div><button class="big-btn" onclick="showRates()">Get Live Rates →</button></div></div>
 <div id="page-shipments" class="hidden"><div style="max-width:800px;margin:40px auto"><h2 style="font-size:32px;margin:0">Your shipments</h2><p style="color:#475569">All your labels in one place.</p><div id="shipList"></div><button class="btn2" style="margin-top:20px" onclick="go('dash')">← Back to Dashboard</button></div></div>
-<div id="page-api" class="hidden"><div class="box" style="max-width:720px"><h2 style="margin:0;font-size:32px">API Test</h2><p style="color:#475569">This page does NOT ask for your key. The key lives on the server in Render Environment Variables. This page just asks the server "is the API connected?" and shows the server's answer. No key ever appears in the browser or in index.js.</p><button class="big-btn" onclick="testApi()">Test API On Server →</button><p id="apiMsg" class="small"></p><h3>Response:</h3><pre id="apiOut">Click Test API. Server will use CARRIER_API_URL + CARRIER_API_KEY from its Environment Variables.</pre><p class="small">To set the key: Render > Your Service > Environment > Add CARRIER_API_URL and CARRIER_API_KEY > Save > Redeploy. Your key file you create locally should be named .env and NEVER committed to GitHub.</p></div></div>
+<div id="page-api" class="hidden"><div class="box" style="max-width:720px"><h2 style="margin:0;font-size:32px">API Test</h2><p style="color:#475569">This page does NOT ask for your key. The key lives on the server in Render Environment Variables. This page just asks the server "is the API connected?" and shows the server's answer. No key ever appears in the browser or in index.js.</p><button class="big-btn" onclick="testApi()">Test API On Server →</button><p id="apiMsg" class="small"></p><h3>Response:</h3><pre id="apiOut">Click Test API. Server will use CARRIER_API_URL + CARRIER_API_KEY from its Environment Variables.</pre><p class="small">To set the key: Render > Your Service > Environment > Add CARRIER_API_URL and CARRIER_API_KEY > Save > Redeploy. Your key file you create locally should be named .env and NEVER committed to 【entity-GitHub¦canonical_name=GitHub】.</p></div></div>
 </main>
 <footer><b style="color:#0f172a">67ship.com</b> — Cheap shipping, without the hassle.<br>Simple, transparent 67ship rates. <a href="#" onclick="go('api');return false">API Test</a></footer>
 <script>
@@ -111,8 +110,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       try {
-        // FIXED per official WARP docs you pasted: header is "apikey" - no underscore
-        // We send all 3 forms so it works even if Swagger says api_key
+        // OFFICIAL WARP DOC: Headers: apikey - ONLY this one, no underscore, no extra headers
         const incoming = JSON.parse(body || '{}');
         const warpBody = JSON.stringify({
           pickupDate: new Date().toISOString().slice(0,10),
@@ -128,7 +126,7 @@ const server = http.createServer(async (req, res) => {
             quantity: 1
           }]
         });
-        const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'apikey': CARRIER_API_KEY, 'api_key': CARRIER_API_KEY, 'x-api-key': CARRIER_API_KEY }, body: warpBody });
+        const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'apikey': CARRIER_API_KEY }, body: warpBody });
         const txt = await r.text();
         let parsed = {};
         try { parsed = JSON.parse(txt); } catch(e) {}
