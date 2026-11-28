@@ -111,39 +111,43 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       try {
-        // FIXED: WARP wants header named api_key, NOT Authorization Bearer
+        // FIXED per official WARP docs you pasted: header is "apikey" - no underscore
+        // We send all 3 forms so it works even if Swagger says api_key
         const incoming = JSON.parse(body || '{}');
-const warpBody = JSON.stringify({
-  pickupDate: new Date().toISOString().slice(0,10),
-  pickupInfo: { zipcode: String(incoming.from_zip || '') },
-  deliveryInfo: { zipcode: String(incoming.to_zip || '') },
-  items: [{
-    height: Number(incoming.height || 6),
-    length: Number(incoming.length || 10),
-    width: Number(incoming.width || 8),
-    sizeUnit: 'IN',
-    totalWeight: Number(incoming.weight_lbs || 2),
-    weightUnit: 'lbs',
-    quantity: 1
-  }]
-});
-const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'api_key': CARRIER_API_KEY }, body: warpBody });
+        const warpBody = JSON.stringify({
+          pickupDate: new Date().toISOString().slice(0,10),
+          pickupInfo: { zipcode: String(incoming.from_zip || '') },
+          deliveryInfo: { zipcode: String(incoming.to_zip || '') },
+          listItems: [{
+            height: Number(incoming.height || 6),
+            length: Number(incoming.length || 10),
+            width: Number(incoming.width || 8),
+            sizeUnit: 'IN',
+            totalWeight: Number(incoming.weight_lbs || 2),
+            weightUnit: 'lbs',
+            quantity: 1
+          }]
+        });
+        const r = await fetch(CARRIER_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'apikey': CARRIER_API_KEY, 'api_key': CARRIER_API_KEY, 'x-api-key': CARRIER_API_KEY }, body: warpBody });
         const txt = await r.text();
-let parsed = {};
-try { parsed = JSON.parse(txt); } catch(e) {}
-let options = parsed.options || parsed.quotes || [];
-let rates = options.map(o => ({
-  carrier: o.carrierName || o.carrierCode || 'Carrier',
-  service: o.serviceLevel || o.shipmentType || 'Standard',
-  price: Number(o.rate || o.price?.amount || 0),
-  eta: o.transitTime ? o.transitTime + ' days' : ''
-}));
-res.writeHead(200, { 'Content-Type': 'application/json' });
-if (rates.length) {
-  res.end(JSON.stringify({ rates: rates, raw: parsed }));
-} else {
-  res.end(JSON.stringify(parsed));
-}
+        let parsed = {};
+        try { parsed = JSON.parse(txt); } catch(e) {}
+        let options = parsed.options || parsed.quotes || [];
+        let rates = options.map(o => ({
+          carrier: o.carrierName || o.carrierCode || 'Carrier',
+          service: o.serviceLevel || o.shipmentType || 'Standard',
+          price: Number(o.rate || o.price?.amount || 0),
+          eta: o.transitTime ? o.transitTime + ' days' : ''
+        }));
+        if (!rates.length && parsed.price) {
+          rates = [{ carrier: 'WARP', service: parsed.shipmentType || 'Freight Quote', price: Number(parsed.price.amount || parsed.price || 0), eta: '' }];
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        if (rates.length) {
+          res.end(JSON.stringify({ rates: rates, raw: parsed }));
+        } else {
+          res.end(JSON.stringify(parsed));
+        }
       } catch (e) {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ demo: true, error: e.message }));
